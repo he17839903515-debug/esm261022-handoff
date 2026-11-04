@@ -12,6 +12,7 @@
 
 - `PROJECT_MASTER.md`：项目原始目标、固定约束和不可偏离的主线。
 - `PROJECT_STATUS.md`：已完成工作、当前进度、待办事项和阻塞问题。
+- `CROSS_CHAT_BRIDGE.md`：已验证的跨聊天读取与 Work 消息续发方法。
 - `RESEARCH/`：GitHub 实际项目调研、证据链接及采用评估。
 - `DECISIONS/`：最终方案、技术决策及其依据。
 
@@ -94,5 +95,12 @@
 - 不得擅自更改产品定位，不得扩展到宠物机器人支线。
 - 任何采购、下单、对外发布或不可逆操作先请求用户确认。
 
-### 本聊天与 Work 的协作边界
-当前聊天无法直接向另一个独立 ChatGPT Work 会话发送命令、读取其实时内部状态或在后台持续监控它。正确交接方式：将本仓库的 HANDOFF.md 和最新 PROJECT_STATUS.md 作为 Work 的项目上下文/任务输入；Work 完成每批后更新本仓库与本地日志。用户把 Work 的结果/链接带回本聊天后，我负责独立审查和纠偏。不得声称两个会话已建立实时直连。
+### 本聊天与 Work 的协作边界（2026-11-04 修正）
+本机 ChatGPT/Codex 桌面应用提供原生跨会话工具，包含 `list_threads`、`read_thread`、`send_message_to_thread`、`wait_threads` 和会话导航能力。本轮已实际验证 `list_threads` 与 `read_thread` 能读取历史 ChatGPT 对话及本地 Codex 线程；因此不能再笼统声称跨聊天读取不可用。
+
+注意：
+- 这些工具调用依赖桌面执行器提供的真实会话元数据；普通脚本若缺少执行器上下文，可能无法调用写入/导航动作。不要伪造线程元数据、用户身份或临时管道标识。
+- 对本地 Codex Work 线程，已验证的消息续发备用方法是使用本机 Codex CLI 的 `queue --thread <thread_id> --message <prompt> --resume`。返回队列消息 ID 仅证明消息已入队；还必须通过 `read_thread` 和实际文件检查确认执行状态。
+- `send_message_to_thread` 已确认存在于工具目录，但本轮从外部协调器手动调用未成功；在真实执行器上下文中验证成功前，不应宣称该写入路径已打通。
+- 协调器负责检索历史 ChatGPT 对话、核对线程状态和审查成果；Work/Codex 继续负责长时间工程执行。每批结果必须落盘并更新交接资料。
+- 详细的安全调用边界与备用流程见 `CROSS_CHAT_BRIDGE.md`。
